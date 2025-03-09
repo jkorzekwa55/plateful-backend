@@ -2,6 +2,7 @@ package com.plateful.backend.entity;
 
 import lombok.Data;
 import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
+import org.springframework.data.cassandra.core.mapping.CassandraType;
 import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.core.mapping.Table;
 
@@ -18,6 +19,7 @@ public class UserMeal {
     private UUID mealId;
     private String title;
     private String description;
+    @CassandraType(type = CassandraType.Name.BLOB)
     private byte[] mealImage;
     private List<String> ingredients;
     private String recipeLink;
