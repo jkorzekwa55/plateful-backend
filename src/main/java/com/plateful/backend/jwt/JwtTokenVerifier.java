@@ -40,7 +40,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
         String path = request.getServletPath();
 
-        if (Objects.equals(path, "/authentication/login")
+        if (Objects.equals(path, "/register")
                 || Objects.equals(path, "/authentication/refresh")
                 || Objects.equals(path, "/login")) {
             filterChain.doFilter(request, response);
