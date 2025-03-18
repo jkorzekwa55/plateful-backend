@@ -1,9 +1,10 @@
 package com.plateful.backend.jwt;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.plateful.backend.dto.LoginRequestDto;
-import com.plateful.backend.entity.User;
+import com.plateful.backend.entity.UserByEmail;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,11 +19,12 @@ import java.io.IOException;
 import java.util.*;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
 @AllArgsConstructor
+
 public class JwtUsernameAndPasswordAuthentication extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JwtConfig jwtConfig;
+
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request,
@@ -51,7 +53,7 @@ public class JwtUsernameAndPasswordAuthentication extends UsernamePasswordAuthen
                                             FilterChain chain,
                                             Authentication authResult) throws IOException {
 
-        User user = (User) authResult.getPrincipal();
+        UserByEmail user = (UserByEmail) authResult.getPrincipal();
 
         var roles = new ArrayList<String>();
 
@@ -62,7 +64,7 @@ public class JwtUsernameAndPasswordAuthentication extends UsernamePasswordAuthen
                 .withIssuer(request.getRequestURL().toString())
                 .withClaim("roles", roles)
                 .withClaim("type", "authentication")
-                .toString();
+                .sign(Algorithm.HMAC256(jwtConfig.getSecretKey()));
 
         String refreshToken = JWT.create()
                 .withSubject(user.getId().toString())
@@ -70,7 +72,7 @@ public class JwtUsernameAndPasswordAuthentication extends UsernamePasswordAuthen
                 .withExpiresAt(new Date(System.currentTimeMillis() + jwtConfig.getRefreshTokenExpirationAfterDays() * 24 * 60 * 60 * 1000))
                 .withIssuer(request.getRequestURL().toString())
                 .withClaim("type", "refresh")
-                .toString();
+                .sign(Algorithm.HMAC256(jwtConfig.getSecretKey()));
 
         Map<String, String> tokens = new HashMap<>();
         tokens.put("token", token);
